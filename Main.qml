@@ -34,7 +34,10 @@ Window {
                 clip: true
                 model: ListModel {
                     ListElement {
-                        message: "> Hi, this is a list view for messages!"
+                        message: "> Hi there!"
+                    }
+                    ListElement {
+                        message: "> This is a list view for messages!"
                     }
                 }
                 delegate: ItemDelegate {
