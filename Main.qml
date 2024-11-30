@@ -11,6 +11,10 @@ Window {
     visible: true
     title: qsTr("Blabla")
 
+    ListModel {
+        id: messageModel
+    }
+
     RowLayout {
         anchors.fill: parent
         anchors.margins: 10
@@ -27,19 +31,11 @@ Window {
         }
 
         ColumnLayout {
-
             ListView {
                 Layout.fillHeight: true
                 Layout.fillWidth: true
                 clip: true
-                model: ListModel {
-                    ListElement {
-                        message: "> Hi there!"
-                    }
-                    ListElement {
-                        message: "> This is a list view for messages!"
-                    }
-                }
+                model: messageModel
                 delegate: ItemDelegate {
                     required property string message
                     text: message
@@ -53,18 +49,30 @@ Window {
                     Layout.fillWidth: true
                     onAccepted: buttonReply.clicked()
                 }
+
                 Button {
                     id: buttonReply
                     text: qsTr("Send")
                     highlighted: true
                     onClicked: {
                         if (server && textFieldReply.text.length > 0) {
-                            server.sendMessage(textFieldReply.text)  // Calling sendMessage method on the 'server' object
+                            server.sendMessage(textFieldReply.text)
+                            var formattedMessage = server.prepareMessage(textFieldReply.text)
+                            messageModel.append({ "message": formattedMessage })
                             textFieldReply.clear()
                         }
                     }
                 }
             }
+        }
+    }
+
+    Connections {
+            target: server
+
+        function onNewMessageReceived(newMessage) {
+            console.log("New message received:", newMessage);
+            messageListView.model.append({ "message": "Server: " + newMessage });
         }
     }
 }

@@ -26,6 +26,12 @@ int main(int argc, char *argv[])
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
 
+    QObject::connect(&server, &Server::newMessageReceived, &engine, [&engine](const QString &message) {
+        QQmlContext *context = engine.rootContext();
+        context->setContextProperty("newMessage", message);
+    });
+
+
     engine.load(QUrl(QStringLiteral("qrc:/qt/qml/Blabla/Main.qml")));
 
     return app.exec();

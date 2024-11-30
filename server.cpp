@@ -1,6 +1,7 @@
 // server.cpp
 #include "server.h"
 #include <QDebug>
+#include <QDateTime>
 
 Server::Server(QObject *parent)
     : QTcpServer(parent) {}
@@ -37,6 +38,12 @@ void Server::onDisconnected() {
     qDebug() << "Client disconnected: " << clientSocket->peerAddress().toString();
     clients.removeAll(clientSocket);
     clientSocket->deleteLater();
+}
+
+QString Server::prepareMessage(const QString &userMessage) {
+    QDateTime now = QDateTime::currentDateTime();
+    QString timestamp = now.toString("yyyy-MM-dd HH:mm:ss");
+    return QString("You: %1 (%2)").arg(userMessage, timestamp);
 }
 
 void Server::sendMessage(const QString &message) {
