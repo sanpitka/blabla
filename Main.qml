@@ -15,15 +15,15 @@ Window {
         anchors.fill: parent
         anchors.margins: 10
         Rectangle {
-           color: 'gray'
-           Layout.fillWidth: true
-           Layout.fillHeight: true
-           Layout.minimumWidth: 200
-           Layout.maximumWidth:200
-           Text {
-               anchors.centerIn: parent
-               text: "Some space for channels..."
-           }
+            color: 'gray'
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.minimumWidth: 200
+            Layout.maximumWidth:200
+            Text {
+                anchors.centerIn: parent
+                text: "Some space for channels..."
+            }
         }
 
         ColumnLayout {
@@ -58,8 +58,10 @@ Window {
                     text: qsTr("Send")
                     highlighted: true
                     onClicked: {
-                        console.log(textFieldReply.text)
-                        textFieldReply.clear()
+                        if (server && textFieldReply.text.length > 0) {
+                            server.sendMessage(textFieldReply.text)  // Calling sendMessage method on the 'server' object
+                            textFieldReply.clear()
+                        }
                     }
                 }
             }

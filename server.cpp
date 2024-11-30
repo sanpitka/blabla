@@ -1,3 +1,4 @@
+// server.cpp
 #include "server.h"
 #include <QDebug>
 
@@ -12,7 +13,7 @@ void Server::incomingConnection(qintptr socketDescriptor) {
         connect(clientSocket, &QTcpSocket::readyRead, this, &Server::onReadyRead);
         connect(clientSocket, &QTcpSocket::disconnected, this, &Server::onDisconnected);
 
-        qDebug() <<"New client connected from: " << clientSocket->peerAddress().toString();
+        qDebug() << "New client connected from: " << clientSocket->peerAddress().toString();
     }
     else {
         delete clientSocket;
@@ -36,4 +37,13 @@ void Server::onDisconnected() {
     qDebug() << "Client disconnected: " << clientSocket->peerAddress().toString();
     clients.removeAll(clientSocket);
     clientSocket->deleteLater();
+}
+
+void Server::sendMessage(const QString &message) {
+    qDebug() << "Sending message: " << message;
+    for (QTcpSocket *clientSocket : clients) {
+        if (clientSocket->state() == QAbstractSocket::ConnectedState) {
+            clientSocket->write(message.toUtf8());
+        }
+    }
 }
