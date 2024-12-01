@@ -31,7 +31,8 @@ Window {
         }
     }
 
-    property string currentChannel: ""
+    property string currentChannel: "The best channel"
+    property int replyToIndex: -1 // No message selected by default
 
     RowLayout {
         anchors.fill: parent
@@ -53,7 +54,7 @@ Window {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.minimumWidth: 200
-                Layout.maximumWidth:200
+                Layout.maximumWidth: 200
                 clip: true
                 model: channelModel
 
@@ -85,23 +86,25 @@ Window {
 
         ColumnLayout {
             ListView {
-                id: listView
+                id: messageView
                 Layout.fillHeight: true
                 Layout.fillWidth: true
+                Layout.topMargin: 30
                 clip: true
                 model: messageModel
+
                 delegate: ItemDelegate {
                     required property string message
                     required property int index
                     implicitHeight: textElement.height + 10
-                    width: listView.width
+                    width: messageView.width
 
                     Rectangle {
                         anchors.fill: parent
                         color: mouseArea.pressed ? "lightblue" : "transparent"
 
-                        Text{
-                            id:textElement
+                        Text {
+                            id: textElement
                             text: message
                             font.pixelSize: 14
                             wrapMode: Text.WordWrap
@@ -119,6 +122,7 @@ Window {
                     }
                 }
             }
+
             ColumnLayout {
                 Text {
                     id: replyToMessage
@@ -128,8 +132,6 @@ Window {
                 }
 
                 RowLayout {
-
-
                     TextField {
                         id: textFieldReply
                         placeholderText: qsTr("Reply")
@@ -144,13 +146,17 @@ Window {
                         onClicked: {
                             if (server && textFieldReply.text.length > 0) {
                                 let replyInfo = replyToIndex !== -1 ? (" (Reply to: #" + replyToIndex + ")") : "";
-                                                server.sendMessage(textFieldReply.text + replyInfo);
+                                server.sendMessage(textFieldReply.text + replyInfo);
+
                                 var formattedMessage = server.prepareMessage(textFieldReply.text)
                                 messageModel.append({ "message": formattedMessage })
-                                textFieldReply.clear()
-                                replyToMessage.text = ""; // Clear reply reference after sending
-                                replyToIndex = -1; // Reset the reply index
-                                listView.positionViewAtEnd()
+
+                                // Reset input and reply state
+                                textFieldReply.clear();
+                                replyToMessage.text = "";
+                                replyToIndex = -1;
+
+                                messageView.positionViewAtEnd();
                             }
                         }
                     }
@@ -158,11 +164,12 @@ Window {
             }
         }
     }
-    property int replyToIndex: -1 // No message selected by default
 
-// Login Dialog
+    // Login Dialog
     Dialog {
         id: loginDialog
+        width: 200
+        height: 300
         modal: true
         visible: true // Ensure the dialog is shown on startup
         title: qsTr("Login")
@@ -172,6 +179,7 @@ Window {
 
         contentItem: ColumnLayout {
             spacing: 10
+
             Text {
                 text: "Please log in!"
                 Layout.alignment: Qt.AlignHCenter
@@ -183,6 +191,7 @@ Window {
                 onAccepted: buttonLogin.clicked()
                 Layout.fillWidth: true
             }
+
             TextField {
                 id: passwordField
                 placeholderText: qsTr("Password")
@@ -198,14 +207,19 @@ Window {
                 onClicked: {
                     if (usernameField.text.length > 0) {
                         server.setUsername(usernameField.text);
-                        console.log("Logged in as:", usernameField.text)
-                        loginDialog.close() // Close the dialog after login
+                        console.log("Logged in as:", usernameField.text);
+                        loginDialog.close(); // Close the dialog after login
+
+                        // Add "joined the chat" message
+                        messageModel.append({
+                            "message": usernameField.text + " joined the chat!",
+                            "index": messageModel.count
+                        });
                     } else {
-                        console.log("Username is required")
+                        console.log("Username is required");
                     }
                 }
             }
         }
     }
 }
-
