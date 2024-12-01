@@ -32,47 +32,79 @@ Window {
 
         ColumnLayout {
             ListView {
+                id: listView
                 Layout.fillHeight: true
                 Layout.fillWidth: true
                 clip: true
                 model: messageModel
                 delegate: ItemDelegate {
                     required property string message
-                    text: message
+                    required property int index
+                    implicitHeight: textElement.height + 10
+                    width: listView.width
+
+                    Rectangle {
+                        anchors.fill: parent
+                        color: mouseArea.pressed ? "lightblue" : "transparent"
+
+                        Text{
+                            id:textElement
+                            text: message
+                            font.pixelSize: 14
+                            wrapMode: Text.WordWrap
+                            width: parent.width - 10
+                        }
+
+                        MouseArea {
+                            id: mouseArea
+                            anchors.fill: parent
+                            onClicked: {
+                                replyToIndex = index;
+                                replyToMessage.text = "Replying to: " + message;
+                            }
+                        }
+                    }
                 }
             }
-
-            RowLayout {
-                TextField {
-                    id: textFieldReply
-                    placeholderText: qsTr("Reply")
-                    Layout.fillWidth: true
-                    onAccepted: buttonReply.clicked()
+            ColumnLayout {
+                Text {
+                    id: replyToMessage
+                    text: ""
+                    color: "gray"
+                    visible: replyToMessage.text !== ""
                 }
 
-                Button {
-                    id: buttonReply
-                    text: qsTr("Send")
-                    highlighted: true
-                    onClicked: {
-                        if (server && textFieldReply.text.length > 0) {
-                            server.sendMessage(textFieldReply.text)
-                            var formattedMessage = server.prepareMessage(textFieldReply.text)
-                            messageModel.append({ "message": formattedMessage })
-                            textFieldReply.clear()
+                RowLayout {
+
+
+                    TextField {
+                        id: textFieldReply
+                        placeholderText: qsTr("Reply")
+                        Layout.fillWidth: true
+                        onAccepted: buttonReply.clicked()
+                    }
+
+                    Button {
+                        id: buttonReply
+                        text: qsTr("Send")
+                        highlighted: true
+                        onClicked: {
+                            if (server && textFieldReply.text.length > 0) {
+                                let replyInfo = replyToIndex !== -1 ? (" (Reply to: #" + replyToIndex + ")") : "";
+                                                server.sendMessage(textFieldReply.text + replyInfo);
+                                var formattedMessage = server.prepareMessage(textFieldReply.text)
+                                messageModel.append({ "message": formattedMessage })
+                                textFieldReply.clear()
+                                replyToMessage.text = ""; // Clear reply reference after sending
+                                replyToIndex = -1; // Reset the reply index
+                                listView.positionViewAtEnd()
+                            }
                         }
                     }
                 }
             }
         }
     }
-
-    Connections {
-            target: server
-
-        function onNewMessageReceived(newMessage) {
-            console.log("New message received:", newMessage);
-            messageListView.model.append({ "message": "Server: " + newMessage });
-        }
-    }
+    property int replyToIndex: -1 // No message selected by default
 }
+
