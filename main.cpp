@@ -31,8 +31,8 @@ int main(int argc, char *argv[])
         context->setContextProperty("newMessage", message);
     });
 
-
     engine.load(QUrl(QStringLiteral("qrc:/qt/qml/Blabla/Main.qml")));
+    //engine.load(QUrl(QStringLiteral("qrc:/qt/qml/Blabla/login.qml")));
 
     return app.exec();
 }

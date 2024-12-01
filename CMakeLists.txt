@@ -19,6 +19,7 @@ qt_add_qml_module(appBlabla
         Main.qml
         SOURCES server.h
         SOURCES server.cpp
+        QML_FILES
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

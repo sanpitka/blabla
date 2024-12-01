@@ -6,6 +6,11 @@
 Server::Server(QObject *parent)
     : QTcpServer(parent) {}
 
+void Server::setUsername(const QString &username) {
+    m_username = username;
+    qDebug() << "Username set to: " << m_username;
+}
+
 void Server::incomingConnection(qintptr socketDescriptor) {
     auto *clientSocket = new QTcpSocket(this);
 
@@ -42,15 +47,34 @@ void Server::onDisconnected() {
 
 QString Server::prepareMessage(const QString &userMessage) {
     QDateTime now = QDateTime::currentDateTime();
-    QString timestamp = now.toString("yyyy-MM-dd HH:mm:ss");
-    return QString("You: %1 (%2)").arg(userMessage, timestamp);
+    QString timestamp = now.toString("HH:mm:ss");
+    return QString("%1 at %2: %3").arg(m_username, timestamp, userMessage);
 }
 
-void Server::sendMessage(const QString &message) {
-    qDebug() << "Sending message: " << message;
+void Server::sendMessage(const QString &userMessage) {
+    if (m_username.isEmpty()) {
+        qDebug() << "Cannot send message. Username is not set.";
+        return;
+    }
+
+    QDateTime now = QDateTime::currentDateTime();
+    QString timestamp = now.toString("HH:mm:ss");
+    QString formattedMessage = QString("%1 at %2: %3").arg(m_username, timestamp, userMessage);
+
+    qDebug() << "Sending message:" << formattedMessage;
+
     for (QTcpSocket *clientSocket : clients) {
         if (clientSocket->state() == QAbstractSocket::ConnectedState) {
-            clientSocket->write(message.toUtf8());
+            clientSocket->write(formattedMessage.toUtf8());
         }
     }
+}
+
+bool Server::validateLogin(const QString &username) {
+    if (username.isEmpty()) {
+        qDebug() << "Invalid login: username is empty.";
+        return false;
+    }
+    qDebug() << "Valid login for username:" << username;
+    return true;
 }

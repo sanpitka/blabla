@@ -16,6 +16,8 @@ public:
     explicit Server(QObject *parent = nullptr);
     Q_INVOKABLE void sendMessage(const QString &message);
     Q_INVOKABLE QString prepareMessage(const QString &userMessage);
+    Q_INVOKABLE bool validateLogin(const QString &username);
+    Q_INVOKABLE void setUsername(const QString &username);
 
 
 protected:
@@ -27,6 +29,7 @@ private slots:
 
 private:
     QList<QTcpSocket *> clients;  // List to store connected clients
+    QString m_username;
 
 signals:
     void newMessageReceived(const QString &message);  // Signal for sending a message to QML

@@ -64,7 +64,7 @@ Window {
                         color: currentChannel === name ? "lightblue" : "transparent" // Highlight selected
 
                         Text {
-                            text: name
+                            text: privacy === "private" ? name + " 🔒" : name
                             anchors.left: parent.left
                             anchors.leftMargin: 10
                             anchors.verticalCenter: parent.verticalCenter
@@ -159,5 +159,53 @@ Window {
         }
     }
     property int replyToIndex: -1 // No message selected by default
+
+// Login Dialog
+    Dialog {
+        id: loginDialog
+        modal: true
+        visible: true // Ensure the dialog is shown on startup
+        title: qsTr("Login")
+
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
+
+        contentItem: ColumnLayout {
+            spacing: 10
+            Text {
+                text: "Please log in!"
+                Layout.alignment: Qt.AlignHCenter
+            }
+
+            TextField {
+                id: usernameField
+                placeholderText: qsTr("Username")
+                onAccepted: buttonLogin.clicked()
+                Layout.fillWidth: true
+            }
+            TextField {
+                id: passwordField
+                placeholderText: qsTr("Password")
+                echoMode: TextInput.Password
+                onAccepted: buttonLogin.clicked()
+                Layout.fillWidth: true
+            }
+
+            Button {
+                id: buttonLogin
+                text: qsTr("Login")
+                highlighted: true
+                onClicked: {
+                    if (usernameField.text.length > 0) {
+                        server.setUsername(usernameField.text);
+                        console.log("Logged in as:", usernameField.text)
+                        loginDialog.close() // Close the dialog after login
+                    } else {
+                        console.log("Username is required")
+                    }
+                }
+            }
+        }
+    }
 }
 
