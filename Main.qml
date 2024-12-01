@@ -15,18 +15,71 @@ Window {
         id: messageModel
     }
 
+    ListModel {
+        id: channelModel
+        ListElement {
+            name: "The best channel"
+            privacy: "public"
+        }
+        ListElement {
+            name: "Even better channel"
+            privacy: "public"
+        }
+        ListElement {
+            name: "Family chat"
+            privacy: "private"
+        }
+    }
+
+    property string currentChannel: ""
+
     RowLayout {
         anchors.fill: parent
         anchors.margins: 10
-        Rectangle {
-            color: 'gray'
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+
+        ColumnLayout {
             Layout.minimumWidth: 200
-            Layout.maximumWidth:200
+            Layout.maximumWidth: 200
+            Layout.fillHeight: true
+
             Text {
-                anchors.centerIn: parent
-                text: "Some space for channels..."
+                text: "Channels"
+                font.pixelSize: 18
+                font.bold: true
+            }
+
+            ListView {
+                id: channelView
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.minimumWidth: 200
+                Layout.maximumWidth:200
+                clip: true
+                model: channelModel
+
+                delegate: ItemDelegate {
+                    width: channelView.width
+                    Rectangle {
+                        anchors.fill: parent
+                        color: currentChannel === name ? "lightblue" : "transparent" // Highlight selected
+
+                        Text {
+                            text: name
+                            anchors.left: parent.left
+                            anchors.leftMargin: 10
+                            anchors.verticalCenter: parent.verticalCenter
+                            font.pixelSize: 16
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                currentChannel = name; // Set the selected channel
+                                console.log("Selected channel: " + name)
+                            }
+                        }
+                    }
+                }
             }
         }
 
