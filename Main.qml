@@ -11,12 +11,15 @@ Window {
     visible: true
     title: qsTr("Blabla")
 
+    // Model to store chat messages
     ListModel {
         id: messageModel
     }
 
+    // Model to store channel information
     ListModel {
         id: channelModel
+        //Predefined public and private channels
         ListElement {
             name: "The best channel"
             privacy: "public"
@@ -32,12 +35,15 @@ Window {
     }
 
     property string currentChannel: "The best channel"
+
+    // Index of the message being replied to
     property int replyToIndex: -1 // No message selected by default
 
     RowLayout {
         anchors.fill: parent
         anchors.margins: 10
 
+        // Column for channels
         ColumnLayout {
             Layout.minimumWidth: 200
             Layout.maximumWidth: 200
@@ -84,6 +90,7 @@ Window {
             }
         }
 
+        // Message column
         ColumnLayout {
             ListView {
                 id: messageView
@@ -123,6 +130,7 @@ Window {
                 }
             }
 
+            // Reply column
             ColumnLayout {
                 Text {
                     id: replyToMessage
@@ -139,6 +147,7 @@ Window {
                         onAccepted: buttonReply.clicked()
                     }
 
+                    // Button to send a message
                     Button {
                         id: buttonReply
                         text: qsTr("Send")
@@ -149,8 +158,13 @@ Window {
                                 server.sendMessage(textFieldReply.text + replyInfo);
 
                                 var formattedMessage = server.prepareMessage(textFieldReply.text)
-                                messageModel.append({ "message": formattedMessage })
+                                messageModel.append({ "message": formattedMessage, "index": messageModel.count, "channel": currentChannel })
 
+                                //Print the message info to console
+                                   for (var i = 0; i < messageModel.count; i++) {
+                                       var item = messageModel.get(i);
+                                       console.log("Model Item " + i + ": " + JSON.stringify(item));
+                                   }
                                 // Reset input and reply state
                                 textFieldReply.clear();
                                 replyToMessage.text = "";
